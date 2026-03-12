@@ -5,6 +5,36 @@ from django.utils import timezone
 from phonenumber_field.modelfields import PhoneNumberField
 
 
+class Department(models.Model):
+    """Отдел компании"""
+    name = models.CharField(max_length=100, unique=True, verbose_name='Название')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='Дата обновления')
+
+    class Meta:
+        verbose_name = 'Отдел'
+        verbose_name_plural = 'Отделы'
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+
+class Role(models.Model):
+    """Организационная роль / должность"""
+    name = models.CharField(max_length=100, unique=True, verbose_name='Название')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='Дата обновления')
+
+    class Meta:
+        verbose_name = 'Роль'
+        verbose_name_plural = 'Роли'
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+
 class UserManager(BaseUserManager):
     """Кастомный менеджер для модели User"""
     
@@ -54,6 +84,22 @@ class User(AbstractBaseUser, PermissionsMixin):
         verbose_name='Аватар'
     )
     birth_date = models.DateField(blank=True, null=True, verbose_name='Дата рождения')
+    department = models.ForeignKey(
+        'Department',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name='Отдел',
+        related_name='users'
+    )
+    position = models.ForeignKey(
+        'Role',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name='Должность',
+        related_name='users'
+    )
     role = models.CharField(
         max_length=20,
         choices=ROLE_CHOICES,

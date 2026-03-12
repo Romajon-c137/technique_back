@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-u-vtokglcmwr9b#3)$7n^d8((=n8!rk*xcm5)(u+#upb_i!(ys
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '192.168.1.87', '0.0.0.0', '192.168.1.95', '192.168.0.30', '192.168.1.124', 'back.akfaglass.kg'] 
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '192.168.1.87', '0.0.0.0', '192.168.1.95', '192.168.0.30', '192.168.1.67', 'back.akfaglass.kg'] 
 
 APPEND_SLASH = False
 

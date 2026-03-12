@@ -4,7 +4,8 @@ from rest_framework import status, viewsets, filters
 from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 from drf_spectacular.utils import extend_schema, OpenApiResponse, extend_schema_view, OpenApiParameter
-from .serializers import LoginSerializer, LoginResponseSerializer, UserSerializer
+from .serializers import LoginSerializer, LoginResponseSerializer, UserSerializer, RegisterSerializer, DepartmentSerializer, RoleSerializer
+from .models import Department, Role
 
 
 class LoginAPIView(APIView):
@@ -50,6 +51,71 @@ class LoginAPIView(APIView):
             }, status=status.HTTP_200_OK)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class DepartmentListAPIView(APIView):
+    """API для получения списка отделов"""
+    permission_classes = [AllowAny]
+
+    @extend_schema(
+        responses={200: DepartmentSerializer(many=True)},
+        tags=['Authentication'],
+        summary='Список отделов',
+        description='Возвращает список всех отделов для выбора при регистрации.'
+    )
+    def get(self, request):
+        departments = Department.objects.all()
+        return Response(DepartmentSerializer(departments, many=True).data)
+
+
+class RoleListAPIView(APIView):
+    """API для получения списка ролей"""
+    permission_classes = [AllowAny]
+
+    @extend_schema(
+        responses={200: RoleSerializer(many=True)},
+        tags=['Authentication'],
+        summary='Список ролей',
+        description='Возвращает список всех ролей для выбора при регистрации и редактировании профиля.'
+    )
+    def get(self, request):
+        roles = Role.objects.all()
+        return Response(RoleSerializer(roles, many=True).data)
+
+
+class RegisterAPIView(APIView):
+    """API для регистрации нового пользователя по номеру телефона"""
+    permission_classes = [AllowAny]
+
+    @extend_schema(
+        request=RegisterSerializer,
+        responses={
+            201: OpenApiResponse(
+                response=LoginResponseSerializer,
+                description='Успешная регистрация'
+            ),
+            400: OpenApiResponse(description='Ошибка валидации данных'),
+        },
+        tags=['Authentication'],
+        summary='Регистрация пользователя',
+        description='Создаёт нового пользователя по номеру телефона и паролю. Возвращает JWT токены и данные пользователя.'
+    )
+    def post(self, request):
+        serializer = RegisterSerializer(data=request.data)
+
+        if serializer.is_valid():
+            user = serializer.save()
+            user.update_last_login()
+
+            refresh = RefreshToken.for_user(user)
+
+            return Response({
+                'access_token': str(refresh.access_token),
+                'refresh_token': str(refresh),
+                'user': UserSerializer(user).data
+            }, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 from rest_framework.permissions import IsAuthenticated
 from .serializers import ChangePasswordSerializer

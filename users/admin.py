@@ -2,7 +2,21 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django import forms
-from .models import User
+from .models import User, Department, Role
+
+
+@admin.register(Department)
+class DepartmentAdmin(admin.ModelAdmin):
+    list_display = ('name', 'created_at')
+    search_fields = ('name',)
+    ordering = ('name',)
+
+
+@admin.register(Role)
+class RoleAdmin(admin.ModelAdmin):
+    list_display = ('name', 'created_at')
+    search_fields = ('name',)
+    ordering = ('name',)
 
 
 class UserCreationForm(forms.ModelForm):
@@ -56,7 +70,7 @@ class UserAdmin(BaseUserAdmin):
     
     fieldsets = (
         (None, {'fields': ('phone', 'password')}),
-        ('Личная информация', {'fields': ('full_name', 'avatar', 'birth_date')}),
+        ('Личная информация', {'fields': ('full_name', 'avatar', 'birth_date', 'department', 'position')}),
         ('Права доступа', {'fields': ('role', 'is_active', 'is_staff', 'is_superuser')}),
         ('Важные даты', {'fields': ('last_login_at', 'created_at', 'updated_at')}),
     )
